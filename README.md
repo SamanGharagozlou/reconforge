@@ -1,5 +1,7 @@
 # ReconForge
 
+ [![Tests](https://github.com/SamanGharagozlou/reconforge/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/SamanGharagozlou/reconforge/actions/workflows/tests.yml). 
+
 Payment reconciliation investigations with traceable evidence.
 
 **Status: preliminary foundation, 17 September 2026.** This starter contains a
