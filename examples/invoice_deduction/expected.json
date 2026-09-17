@@ -1,0 +1,13 @@
+{
+  "currency": "EUR",
+  "totals_minor": {
+    "ledger": 11530000,
+    "provider": 11505000,
+    "bank": 11505000
+  },
+  "ledger_to_provider_residual_minor": 25000,
+  "provider_to_bank_residual_minor": 0,
+  "missing_ledger_event_id": "evt_invoice_001",
+  "missing_ledger_event_amount_minor": -25000,
+  "review_required": true
+}

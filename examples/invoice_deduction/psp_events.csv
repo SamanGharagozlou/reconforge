@@ -1,0 +1,8 @@
+tenant_id,merchant_id,batch_id,event_id,event_type,amount_eur,currency,effective_at,description
+demo_tenant,demo_merchant,batch_20260917_001,evt_capture_001,Capture,50000.00,EUR,2026-09-16T09:00:00Z,Synthetic captured payment A
+demo_tenant,demo_merchant,batch_20260917_001,evt_capture_002,Capture,40000.00,EUR,2026-09-16T10:00:00Z,Synthetic captured payment B
+demo_tenant,demo_merchant,batch_20260917_001,evt_capture_003,Capture,30000.00,EUR,2026-09-16T11:00:00Z,Synthetic captured payment C
+demo_tenant,demo_merchant,batch_20260917_001,evt_fee_001,Fee,-1200.00,EUR,2026-09-17T08:00:00Z,Synthetic provider fee
+demo_tenant,demo_merchant,batch_20260917_001,evt_refund_001,Refund,-2500.00,EUR,2026-09-17T08:10:00Z,Synthetic refunded amount
+demo_tenant,demo_merchant,batch_20260917_001,evt_reserve_001,ReserveAdjustment,-1000.00,EUR,2026-09-17T08:20:00Z,Synthetic reserve increase
+demo_tenant,demo_merchant,batch_20260917_001,evt_invoice_001,InvoiceDeduction,-250.00,EUR,2026-09-17T08:30:00Z,Synthetic invoice deduction INV_DEMO_001
