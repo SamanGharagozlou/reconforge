@@ -4,7 +4,8 @@ User: a payment operations analyst checking a settlement discrepancy.
 
 Input: normalized, synthetic provider, ledger, and bank CSVs for one batch.
 
-Output tonight: exact totals, residuals, event differences, and source references.
+Current output: exact totals, residuals, event differences, source references,
+and immutable case/evidence views exposed through a local API and stdio MCP.
 
 Target output for the later demonstration: a source-backed investigation,
 proposed next action, and a version-bound human-review decision.
@@ -35,15 +36,22 @@ proposed next action, and a version-bound human-review decision.
 
 ## Explicit limits
 
-The starter has no MCP, language model, user authentication, database, durable
-worker, payment integration, or automated accounting action. It compares fixture
+The prototype has a local read-only API and MCP server. It has no language model,
+user authentication, database, durable worker, payment integration, or automated
+accounting action. It compares fixture
 IDs that already match across two normalized sources. Real adapter semantics,
 record completeness and cross-system identity resolution are future work.
 
-## First issues to create
+## Completed in the Day 1 implementation
 
-- Domain: typed case object carrying residuals and evidence IDs.
-- API: read a single synthetic case through a documented endpoint.
-- Evidence: return bounded source rows by verified fixture reference.
-- MCP: expose that read operation as a typed tool.
-- Evaluation: distinguish supported facts, proposed explanations, and unknowns.
+- Typed case object carrying residuals, evidence IDs, and a snapshot version.
+- Documented HTTP endpoints for the synthetic case and its captured evidence.
+- Bounded evidence lookup that rejects unknown IDs and outdated case versions.
+- Three typed read-only MCP tools, tested through a real stdio connection.
+
+## Next implementation work
+
+- Add distinct synthetic scenarios from the case catalogue.
+- Add an investigator that separates supported facts, hypotheses, and unknowns.
+- Define evaluation failures before introducing autonomous orchestration.
+- Design authentication and tenant access before supporting customer data.

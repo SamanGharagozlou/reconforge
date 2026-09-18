@@ -1,3 +1,3 @@
-"""ReconForge's preliminary, offline financial baseline."""
+"""ReconForge's synthetic reconciliation core and read-only interfaces."""
 
-__version__ = "0.0.1"
+__version__ = "0.0.2"

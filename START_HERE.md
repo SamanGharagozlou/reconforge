@@ -1,5 +1,9 @@
 # Tonight's setup
 
+Historical Day 0 instructions for the original 0.0.1 archive. For the current
+checkout, use [the Day 1 setup and verification guide](docs/DAY_01_MCP.md), which
+installs the dependencies needed by the expanded test suite and MCP interface.
+
 Keep tonight to a small, useful checkpoint. The objective is to run and understand
 the first financial example before tomorrow's main session.
 

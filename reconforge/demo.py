@@ -4,6 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
+from . import __version__
 from .money import format_eur
 from .reconciliation import InputError, reconcile
 
@@ -21,7 +22,7 @@ def main() -> None:
         print(json.dumps(result, indent=2, sort_keys=True))
         return
 
-    print("ReconForge 0.0.1 — deterministic synthetic example")
+    print(f"ReconForge {__version__} — deterministic synthetic example")
     print("No model calls, MCP services or financial actions are used.\n")
     for source, amount in result["totals_minor"].items():
         print(f"{source.capitalize():<12} {format_eur(amount)}")

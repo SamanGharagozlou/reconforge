@@ -1,6 +1,7 @@
 """Conservative comparison of one normalized, synthetic EUR settlement batch."""
 
 import csv
+from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import datetime
 from hashlib import sha256
@@ -16,6 +17,7 @@ FIELDS = (
 )
 COMPONENT_TYPES = {"Capture", "Fee", "Refund", "ReserveAdjustment", "InvoiceDeduction"}
 NEGATIVE_TYPES = {"Fee", "Refund", "InvoiceDeduction"}
+SOURCE_FILES = ("ledger_events.csv", "psp_events.csv", "bank_entries.csv")
 
 
 class InputError(ValueError):
@@ -44,16 +46,24 @@ class Event:
 
 
 def load_events(path: Path, *, bank: bool = False) -> list[Event]:
+    """Load a file, then validate the exact bytes read."""
+    try:
+        content = path.read_bytes()
+    except OSError as exc:
+        raise InputError(f"Cannot read UTF-8 input {path.name}: {exc}") from exc
+    return parse_events(content, filename=path.name, bank=bank)
+
+
+def parse_events(content: bytes, *, filename: str, bank: bool = False) -> list[Event]:
     """Read one byte snapshot and validate its normalized schema and scope.
 
     Record numbers are one-based CSV data records, excluding the header. They
     are not physical line numbers, since quoted descriptions may contain newlines.
     """
     try:
-        content = path.read_bytes()
         text = content.decode("utf-8-sig")
-    except (OSError, UnicodeError) as exc:
-        raise InputError(f"Cannot read UTF-8 input {path.name}: {exc}") from exc
+    except UnicodeError as exc:
+        raise InputError(f"Cannot read UTF-8 input {filename}: {exc}") from exc
 
     digest = sha256(content).hexdigest()
     reader = csv.DictReader(StringIO(text, newline=""), strict=True)
@@ -63,9 +73,9 @@ def load_events(path: Path, *, bank: bool = False) -> list[Event]:
 
     try:
         if tuple(reader.fieldnames or ()) != FIELDS:
-            raise InputError(f"{path.name}: headers must exactly match the fixture schema.")
+            raise InputError(f"{filename}: headers must exactly match the fixture schema.")
         for record_number, row in enumerate(reader, 1):
-            where = f"{path.name}, data record {record_number}"
+            where = f"{filename}, data record {record_number}"
             if None in row or any(row.get(name) in (None, "") for name in FIELDS):
                 raise InputError(f"{where}: missing or extra fields.")
             if row["currency"] != "EUR":
@@ -92,16 +102,16 @@ def load_events(path: Path, *, bank: bool = False) -> list[Event]:
             events.append(Event(
                 event_id=row["event_id"], event_type=row["event_type"], cents=cents,
                 effective_at=timestamp.isoformat(), description=row["description"],
-                scope=scope, filename=path.name, record_number=record_number,
+                scope=scope, filename=filename, record_number=record_number,
                 content_hash=digest,
             ))
     except csv.Error as exc:
-        raise InputError(f"{path.name}: invalid CSV.") from exc
+        raise InputError(f"{filename}: invalid CSV.") from exc
 
     if not events:
-        raise InputError(f"{path.name}: no data records; completeness cannot be assumed.")
+        raise InputError(f"{filename}: no data records; completeness cannot be assumed.")
     if len({event.scope for event in events}) != 1:
-        raise InputError(f"{path.name}: mixed tenant, merchant, batch or currency.")
+        raise InputError(f"{filename}: mixed tenant, merchant, batch or currency.")
     if bank and len(events) != 1:
         raise InputError("This baseline supports exactly one bank payout per batch.")
     return events
@@ -112,6 +122,22 @@ def reconcile(directory: Path) -> dict:
     ledger = load_events(directory / "ledger_events.csv")
     provider = load_events(directory / "psp_events.csv")
     bank = load_events(directory / "bank_entries.csv", bank=True)
+    return _compare_events(ledger, provider, bank)
+
+
+def reconcile_snapshots(snapshots: Mapping[str, bytes]) -> dict:
+    """Compare already captured bytes so later evidence uses the same snapshot."""
+    if set(snapshots) != set(SOURCE_FILES):
+        raise InputError("Exactly the three named source snapshots are required.")
+    return _compare_events(
+        parse_events(snapshots["ledger_events.csv"], filename="ledger_events.csv"),
+        parse_events(snapshots["psp_events.csv"], filename="psp_events.csv"),
+        parse_events(snapshots["bank_entries.csv"], filename="bank_entries.csv", bank=True),
+    )
+
+
+def _compare_events(ledger: list[Event], provider: list[Event], bank: list[Event]) -> dict:
+    """Compare records already validated by parse_events; no transport code here."""
     if len({ledger[0].scope, provider[0].scope, bank[0].scope}) != 1:
         raise InputError("The three sources must use the same tenant, merchant, batch and currency.")
 

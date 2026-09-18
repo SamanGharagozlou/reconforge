@@ -4,19 +4,18 @@
 
 Payment reconciliation investigations with traceable evidence.
 
-**Status: preliminary foundation, 17 September 2026.** This starter contains a
-deterministic financial example and its tests. MCP servers, agents, authentication,
-approval workflows, databases, and a web interface are planned and are not
-implemented in this version. ReconForge is a working name.
+**Status: local synthetic prototype, 18 September 2026 (0.0.2).** The deterministic
+core now has a typed case and evidence store, a read-only HTTP API, and a working
+MCP server. Agents, authentication, approvals, databases, and a web interface
+remain planned. ReconForge is a working name.
 
 ## Run the first example
 
 Use Python 3.12 or newer from the extracted `reconforge-starter` directory.
-No third-party packages, accounts, API keys, or network calls are needed.
+The original financial demo still uses only the Python standard library:
 
 ```bash
 python3 -m reconforge.demo
-python3 -m unittest discover -s tests -v
 ```
 
 The supplied fictional merchant has the following settlement totals:
@@ -46,6 +45,40 @@ For another directory using the same strict demonstration schema:
 python3 -m reconforge.demo --data-dir examples/invoice_deduction --json
 ```
 
+## Run the API and MCP milestone
+
+Create a local environment and install the pinned dependencies. Installation
+downloads packages; the fixture demo and MCP round trip use no model or API key.
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+python -m unittest discover -s tests -v
+python -m reconforge.mcp_demo
+```
+
+The suite includes the original 13 tests plus case, HTTP, and MCP checks.
+The MCP demo launches a real stdio server subprocess, discovers its three tools,
+retrieves the case, and retrieves its EUR -250.00 source record. It is a
+deterministic client demonstration; an LLM agent is not implemented yet.
+
+To inspect the HTTP API locally:
+
+```bash
+python -m uvicorn reconforge.api:app --host 127.0.0.1 --port 8000
+```
+
+Open `http://127.0.0.1:8000/docs` for the interactive API documentation.
+The API has no authentication and is intended only for the bundled synthetic
+fixture on your own machine. See [the Day 1 walkthrough](docs/DAY_01_MCP.md).
+
+| MCP tool | Result |
+| --- | --- |
+| `list_cases()` | The single synthetic case and its current version |
+| `get_case(case_id)` | Typed deterministic facts and evidence IDs |
+| `get_evidence(case_id, case_version, evidence_id)` | One source row from that exact captured case snapshot |
+
 ## What is implemented
 
 - Exact EUR parsing into integer cents; floats and sub-cent inputs are rejected.
@@ -56,6 +89,9 @@ python3 -m reconforge.demo --data-dir examples/invoice_deduction --json
 - Source filenames, CSV record references, and SHA-256 source snapshots.
 - A rule that offsetting event differences still require review, even if totals balance.
 - An offline test suite and a reproducible synthetic fixture.
+- Immutable typed case views; source rows and calculations share captured bytes.
+- Version-checked, bounded evidence reads through HTTP and MCP.
+- A real MCP stdio client/server demonstration, covered by CI.
 
 ## What these results mean
 
@@ -83,8 +119,9 @@ targets, not released capabilities.
 
 ## Start here
 
-- [Tonight's short setup](START_HERE.md)
-- [Tomorrow's checklist](docs/DAY_01.md)
+- [Original Day 0 setup](START_HERE.md)
+- [Day 1 checklist](docs/DAY_01.md)
+- [Day 1: case API and read-only MCP](docs/DAY_01_MCP.md)
 - [Scope and acceptance criteria](docs/SCOPE.md)
 - [Financial-core design decision](docs/architecture/0001-financial-core.md)
 - [Fixture definitions](examples/invoice_deduction/README.md)
