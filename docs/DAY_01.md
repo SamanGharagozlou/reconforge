@@ -2,6 +2,11 @@
 
 Planned date: 18 September 2026.
 
+Update: repository publication, GitHub Actions, and the README badge were
+completed on 17 September. The case/API/MCP implementation and commands are in
+[the Day 1 walkthrough](DAY_01_MCP.md). The checklist below records the original
+plan; use the walkthrough to apply and verify today's update.
+
 ## Starting position
 
 The initial synthetic example, strict EUR parser, source references, and tests
