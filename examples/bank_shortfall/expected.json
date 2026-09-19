@@ -1,0 +1,17 @@
+{
+  "currency": "EUR",
+  "totals_minor": {
+    "ledger": 8200000,
+    "provider": 8200000,
+    "bank": 8185000
+  },
+  "ledger_to_provider_residual_minor": 0,
+  "provider_to_bank_residual_minor": 15000,
+  "ledger_to_provider_status": "balanced_on_supplied_events",
+  "provider_to_bank_status": "needs_review",
+  "event_difference_count": 0,
+  "bank_event_id": "evt_bank_001",
+  "bank_amount_eur": "81850.00",
+  "review_required": true,
+  "external_completeness_verified": false
+}

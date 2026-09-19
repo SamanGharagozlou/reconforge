@@ -3,7 +3,7 @@ import unittest
 from fastapi.testclient import TestClient
 
 from reconforge.api import create_app
-from reconforge.cases import CASE_ID, CaseStore
+from reconforge.cases import BANK_CASE_ID, CASE_ID, CaseStore
 
 
 class ApiTests(unittest.TestCase):
@@ -18,8 +18,46 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), self.case.model_dump(mode="json"))
         listed = self.client.get("/cases").json()
-        self.assertEqual(len(listed["cases"]), 1)
-        self.assertEqual(listed["cases"][0]["case_version"], self.case.case_version)
+        self.assertEqual(len(listed["cases"]), 2)
+        summary = next(item for item in listed["cases"] if item["case_id"] == CASE_ID)
+        self.assertEqual(summary["case_version"], self.case.case_version)
+
+    def test_bank_discrepancy_is_visible_in_both_list_and_case(self):
+        response = self.client.get(f"/cases/{BANK_CASE_ID}")
+        self.assertEqual(response.status_code, 200)
+        facts = response.json()["facts"]
+        self.assertEqual(facts["comparisons"]["ledger_to_provider"]["residual_minor"], 0)
+        self.assertEqual(facts["comparisons"]["provider_to_bank"]["residual_minor"], 15000)
+        self.assertTrue(facts["review_required"])
+        listed = self.client.get("/cases").json()["cases"]
+        summary = next(item for item in listed if item["case_id"] == BANK_CASE_ID)
+        self.assertEqual(summary["provider_to_bank_residual_minor"], 15000)
+        self.assertEqual(summary["ledger_to_provider_residual_minor"], 0)
+
+    def test_evidence_lookup_cannot_cross_case_boundaries(self):
+        bank = self.store.get_case(BANK_CASE_ID)
+        bank_ref = next(ref for ref in bank.evidence if ref.file == "bank_entries.csv")
+        response = self.client.get(
+            f"/cases/{BANK_CASE_ID}/evidence/{bank_ref.evidence_id}",
+            params={"case_version": bank.case_version},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["row"]["amount_eur"], "81850.00")
+        invoice_ref = next(ref for ref in self.case.evidence if ref.event_id == "evt_invoice_001")
+        response = self.client.get(
+            f"/cases/{BANK_CASE_ID}/evidence/{invoice_ref.evidence_id}",
+            params={"case_version": bank.case_version},
+        )
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()["detail"], "Unknown evidence ID for this case.")
+
+    def test_another_cases_version_is_rejected_for_valid_bank_evidence(self):
+        bank = self.store.get_case(BANK_CASE_ID)
+        response = self.client.get(
+            f"/cases/{BANK_CASE_ID}/evidence/{bank.evidence[0].evidence_id}",
+            params={"case_version": self.case.case_version},
+        )
+        self.assertEqual(response.status_code, 409)
 
     def test_http_evidence_requires_version_and_returns_correct_row(self):
         reference = next(ref for ref in self.case.evidence if ref.event_id == "evt_invoice_001")

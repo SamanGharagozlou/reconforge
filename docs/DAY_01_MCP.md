@@ -2,6 +2,9 @@
 
 18 September 2026. This is the 0.0.2 local synthetic milestone.
 
+This walkthrough records that earlier milestone. For the current two-case
+version and 48-test suite, use [the next increment](NEXT_02_MULTICASE.md).
+
 ## What you should be able to explain
 
 The internal ledger totals EUR 115,300.00. The provider reports EUR 115,050.00

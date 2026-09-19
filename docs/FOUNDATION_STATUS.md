@@ -1,5 +1,8 @@
 # Foundation verification
 
+Historical 0.0.2 record. See [current verification](MULTICASE_VERIFICATION.md)
+for the later confirmation of CI and the multiple-case implementation.
+
 Date: 18 September 2026. Implementation version: 0.0.2.
 Environment tested: Python 3.12.14 on Linux.
 
