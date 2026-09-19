@@ -2,7 +2,7 @@ import unittest
 
 from mcp import Client
 
-from reconforge.cases import CASE_ID, CaseStore
+from reconforge.cases import BANK_CASE_ID, CASE_ID, CaseStore
 from reconforge.mcp_demo import run_round_trip
 from reconforge.mcp_server import create_server
 
@@ -16,6 +16,45 @@ class McpTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(evidence.row.event_id, "evt_invoice_001")
         self.assertTrue(case.facts.review_required)
         self.assertFalse(case.facts.external_completeness_verified)
+
+    async def test_second_case_runs_through_real_stdio(self):
+        case, evidence, names = await run_round_trip(BANK_CASE_ID)
+        self.assertEqual(case.case_id, BANK_CASE_ID)
+        self.assertEqual(case.facts.comparisons.ledger_to_provider.residual_minor, 0)
+        self.assertEqual(case.facts.comparisons.provider_to_bank.residual_minor, 15000)
+        self.assertEqual(evidence.row.amount_eur, "81850.00")
+        self.assertEqual(evidence.reference.file, "bank_entries.csv")
+        self.assertEqual(evidence.reference.record_number, 1)
+        self.assertEqual(evidence.case_id, BANK_CASE_ID)
+
+    async def test_list_cases_exposes_both_residuals_and_stable_order(self):
+        async with Client(create_server()) as client:
+            result = await client.call_tool("list_cases", {})
+            self.assertFalse(result.is_error)
+            summaries = result.structured_content["cases"]
+            self.assertEqual([item["case_id"] for item in summaries], sorted([CASE_ID, BANK_CASE_ID]))
+            bank = next(item for item in summaries if item["case_id"] == BANK_CASE_ID)
+            self.assertEqual(bank["ledger_to_provider_residual_minor"], 0)
+            self.assertEqual(bank["provider_to_bank_residual_minor"], 15000)
+            self.assertTrue(bank["review_required"])
+
+    async def test_other_case_evidence_and_version_are_rejected_by_mcp(self):
+        store = CaseStore()
+        invoice = store.get_case(CASE_ID)
+        bank = store.get_case(BANK_CASE_ID)
+        async with Client(create_server(store)) as client:
+            result = await client.call_tool("get_evidence", {
+                "case_id": BANK_CASE_ID, "case_version": bank.case_version,
+                "evidence_id": invoice.evidence[0].evidence_id,
+            })
+            self.assertTrue(result.is_error)
+            self.assertIn("Unknown evidence ID for this case", result.content[0].text)
+            result = await client.call_tool("get_evidence", {
+                "case_id": BANK_CASE_ID, "case_version": invoice.case_version,
+                "evidence_id": bank.evidence[0].evidence_id,
+            })
+            self.assertTrue(result.is_error)
+            self.assertIn("Case version changed", result.content[0].text)
 
     async def test_catalogue_is_read_only_and_returns_structured_schemas(self):
         store = CaseStore()

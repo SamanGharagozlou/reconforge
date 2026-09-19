@@ -2,7 +2,7 @@
 
 User: a payment operations analyst checking a settlement discrepancy.
 
-Input: normalized, synthetic provider, ledger, and bank CSVs for one batch.
+Input: normalized, synthetic provider, ledger, and bank CSVs for one batch per case.
 
 Current output: exact totals, residuals, event differences, source references,
 and immutable case/evidence views exposed through a local API and stdio MCP.
@@ -16,7 +16,7 @@ proposed next action, and a version-bound human-review decision.
 | --- | --- | --- |
 | Invoice deduction absent from ledger | Identify event and EUR 250 residual | Demonstrated |
 | Duplicate imported event | Reject the input | Tested within a file |
-| Bank payout differs from provider | Report provider-to-bank residual | Tested |
+| Bank payout differs from provider | Report EUR 150 provider-to-bank residual while the ledger matches | Demonstrated as a second case |
 | Missing bank data | Stop with an explicit input error | Tested |
 | Offset event changes with equal totals | Require review despite zero net difference | Tested |
 | Partial refund | Model separate linked financial events | Planned |
@@ -51,7 +51,16 @@ record completeness and cross-system identity resolution are future work.
 
 ## Next implementation work
 
-- Add distinct synthetic scenarios from the case catalogue.
+- Add timing, ambiguity and incomplete-data scenarios with explicit expected behaviour.
 - Add an investigator that separates supported facts, hypotheses, and unknowns.
 - Define evaluation failures before introducing autonomous orchestration.
 - Design authentication and tenant access before supporting customer data.
+
+## Completed in the multiple-case increment
+
+- Serve two named synthetic cases through the same HTTP and MCP interfaces.
+- Include both residuals in each case summary so bank differences remain visible.
+- Keep evidence lookup inside the requested case and its current snapshot version.
+- Preserve the first case's calculations, version and evidence identifiers.
+- Bound the configured case catalogue to 32 entries and reject invalid startup data.
+- Test both scenarios over real MCP stdio connections, with 48 tests in the suite.
