@@ -2,6 +2,9 @@
 
 18 September 2026. Local synthetic milestone 0.0.3.
 
+This walkthrough records the multiple-case milestone. The current increment is
+[Day 3: investigation reports](DAY_03_REPORTS.md), version 0.0.4.
+
 The first case detects a provider invoice missing from the supplied ledger.
 The second case has matching ledger/provider events but a lower bank payout.
 They now share one API and MCP server while retaining separate evidence context.

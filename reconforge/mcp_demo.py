@@ -41,7 +41,7 @@ async def run_round_trip(case_id: str = CASE_ID) -> tuple[ReconciliationCase, Ev
         async with Client(process, raise_exceptions=True, read_timeout_seconds=10) as client:
             discovered = await client.list_tools()
             names = sorted(tool.name for tool in discovered.tools)
-            if names != ["get_case", "get_evidence", "list_cases"]:
+            if names != ["get_case", "get_evidence", "get_investigation_report", "list_cases"]:
                 raise RuntimeError("Unexpected MCP tool catalogue.")
             listed = await client.call_tool("list_cases", {})
             summary = CaseList.model_validate(listed.structured_content)

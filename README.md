@@ -4,10 +4,17 @@
 
 Payment reconciliation investigations with traceable evidence.
 
-**Status: local synthetic prototype, 18 September 2026 (0.0.3).** Two synthetic
+**Status: local synthetic prototype, 20 September 2026 (0.0.4).** Two synthetic
 settlement cases share a deterministic core, a typed case and evidence store,
-a read-only HTTP API, and an MCP server. Agents, authentication, approvals,
+a read-only HTTP API, and four MCP tools. Investigation reports separate cited
+facts, unverified possibilities, unresolved questions, and human information
+requests. Reports use fixed rules; LLM agents, authentication, approvals,
 databases, and a web interface remain planned. ReconForge is a working name.
+
+**Read an example investigation:** [missing invoice deduction](examples/reports/invoice_deduction.md)
+or [unexplained bank difference](examples/reports/bank_shortfall.md).
+Every reported amount is checked against captured source rows before the server
+returns the report. [Verification scope and results](docs/REPORT_VERIFICATION.md).
 
 ## Run the first example
 
@@ -75,9 +82,10 @@ python -m reconforge.mcp_demo
 python -m reconforge.mcp_demo --case-id case_bank_shortfall_001
 ```
 
-The 48-test suite includes the original 13 financial tests plus case, HTTP, MCP,
-and case-isolation checks. Each MCP demo launches a real stdio server subprocess,
-discovers its three tools, selects a case, and retrieves its captured evidence.
+The 75-test suite includes the original 13 financial tests plus case, HTTP, MCP,
+case-isolation, and report-verification checks. Each MCP demo launches a real
+stdio server subprocess, discovers its four tools, selects a case, and retrieves
+its captured evidence.
 The default retrieves the invoice; `--case-id` above retrieves the bank row. It is a
 deterministic client demonstration; an LLM agent is not implemented yet.
 
@@ -89,13 +97,39 @@ python -m uvicorn reconforge.api:app --host 127.0.0.1 --port 8000
 
 Open `http://127.0.0.1:8000/docs` for the interactive API documentation.
 The API has no authentication and is intended only for the bundled synthetic
-fixtures on your own machine. See [the multiple-case walkthrough](docs/NEXT_02_MULTICASE.md).
+fixtures on your own machine. See [the investigation-report walkthrough](docs/DAY_03_REPORTS.md).
 
 | MCP tool | Result |
 | --- | --- |
 | `list_cases()` | Configured cases, their versions, review flags and both residuals |
 | `get_case(case_id)` | Typed deterministic facts and evidence IDs |
 | `get_evidence(case_id, case_version, evidence_id)` | One source row from that exact captured case snapshot |
+| `get_investigation_report(case_id, case_version)` | Verified fixed-rule findings, unverified possibilities, questions, and human next steps |
+
+## Generate a cited investigation report
+
+With the environment above active:
+
+```bash
+python -m reconforge.report_demo
+python -m reconforge.report_demo --case-id case_bank_shortfall_001
+python -m reconforge.report_demo --case-id case_bank_shortfall_001 --json
+```
+
+Each command retrieves the current case version and its report over real MCP
+stdio. The default output is Markdown; `--json` exposes the typed report and
+verification result. HTTP provides the same report through
+`GET /cases/{case_id}/report?case_version=<version-from-get-case>`.
+
+The server independently recomputes the supplied totals and event differences,
+checks snapshot and row citations, and requires every claim to match the fixed
+report rules. It rejects changed amounts, unrelated citations, omitted findings,
+and hypotheses presented as established causes. Verification is limited to this
+report format and the captured inputs. It does not verify arbitrary model prose,
+source authenticity, or external reporting completeness.
+
+The EUR 150.00 bank discrepancy remains unexplained. The report suggests records
+for a person to obtain; it cannot approve or execute a financial action.
 
 ## What is implemented
 
@@ -111,6 +145,9 @@ fixtures on your own machine. See [the multiple-case walkthrough](docs/NEXT_02_M
 - Version-checked, bounded evidence reads through HTTP and MCP.
 - A real MCP stdio client/server demonstration, covered by CI.
 - Two separate synthetic cases, with bounded configuration and per-case evidence lookup.
+- Version-bound investigation reports with strict integer amounts and two citation types.
+- Report checks that recompute captured financial facts and enforce fixed claim rules.
+- Readable Markdown examples, JSON output, and report retrieval over HTTP and MCP.
 
 ## What these results mean
 
@@ -143,10 +180,12 @@ targets, not released capabilities.
 - [Original Day 0 setup](START_HERE.md)
 - [Day 1 checklist](docs/DAY_01.md)
 - [Day 1: case API and read-only MCP](docs/DAY_01_MCP.md)
-- [Next increment: multiple cases and bank discrepancy](docs/NEXT_02_MULTICASE.md)
-- [Current verification results](docs/MULTICASE_VERIFICATION.md)
+- [Multiple-case milestone](docs/NEXT_02_MULTICASE.md)
+- [Day 3: evidence-verified investigation reports](docs/DAY_03_REPORTS.md)
+- [Current verification results](docs/REPORT_VERIFICATION.md)
 - [Scope and acceptance criteria](docs/SCOPE.md)
 - [Financial-core design decision](docs/architecture/0001-financial-core.md)
+- [Report verification design decision](docs/architecture/0004-investigation-reports.md)
 - [Fixture definitions](examples/invoice_deduction/README.md)
 - [Bank-discrepancy fixture](examples/bank_shortfall/README.md)
 - [Contribution instructions](CONTRIBUTING.md)

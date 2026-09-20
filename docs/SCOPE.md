@@ -5,7 +5,9 @@ User: a payment operations analyst checking a settlement discrepancy.
 Input: normalized, synthetic provider, ledger, and bank CSVs for one batch per case.
 
 Current output: exact totals, residuals, event differences, source references,
-and immutable case/evidence views exposed through a local API and stdio MCP.
+immutable case/evidence views, and fixed-rule investigation reports exposed
+through a local API and stdio MCP. Reports distinguish cited facts, unverified
+possibilities, unresolved questions, and human information requests.
 
 Target output for the later demonstration: a source-backed investigation,
 proposed next action, and a version-bound human-review decision.
@@ -52,7 +54,8 @@ record completeness and cross-system identity resolution are future work.
 ## Next implementation work
 
 - Add timing, ambiguity and incomplete-data scenarios with explicit expected behaviour.
-- Add an investigator that separates supported facts, hypotheses, and unknowns.
+- Add a bounded model-assisted investigator using the case, evidence, and report
+  tools. Keep model interpretation separate from the fixed-rule verified report.
 - Define evaluation failures before introducing autonomous orchestration.
 - Design authentication and tenant access before supporting customer data.
 
@@ -64,3 +67,16 @@ record completeness and cross-system identity resolution are future work.
 - Preserve the first case's calculations, version and evidence identifiers.
 - Bound the configured case catalogue to 32 entries and reject invalid startup data.
 - Test both scenarios over real MCP stdio connections, with 48 tests in the suite.
+
+## Completed in the investigation-report increment
+
+- Generate typed reports with snapshot and row citations, exact money fields,
+  explicit unknowns, and human information requests.
+- Recompute totals and event differences from the captured rows before accepting
+  a report, then enforce the complete fixed report grammar.
+- Reject wrong amounts, invented or irrelevant citations, omitted findings,
+  altered uncertainty labels, and financial-action instructions.
+- Require the selected case version for the fourth MCP tool and HTTP report route.
+- Supply Markdown examples and a real MCP report client; all 75 tests pass in
+  the build environment. See [verification results](REPORT_VERIFICATION.md).
+- Limit reports to 100 event differences; return an error above that limit.
