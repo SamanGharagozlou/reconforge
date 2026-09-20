@@ -3,6 +3,8 @@
 Date: 18 September 2026. Implementation: 0.0.3.
 Build environment: Python 3.12.14 on Linux with the existing pinned requirements.
 
+Historical milestone. See [report verification](REPORT_VERIFICATION.md) for 0.0.4.
+
 ## Observed build results
 
 - All 48 unit and integration tests pass. These include the original 13 financial
@@ -22,11 +24,11 @@ Build environment: Python 3.12.14 on Linux with the existing pinned requirements
 
 ## Platform status
 
-The user confirmed that the preceding 0.0.2 version passed all 33 tests on macOS
-and in GitHub Actions, and ran its local MCP demonstration. Those results do not
-verify this new patch. The 0.0.3 macOS and GitHub Actions runs are pending until
-the user applies and publishes the update. No cross-platform success is implied
-by the build-environment results above.
+On 19 September, the user supplied successful macOS output from the 0.0.3 bank
+MCP demonstration. A GitHub Actions screenshot also showed a successful tests
+workflow on `feat/multiple-cases`, commit `722daca`. The screenshot did not show
+the test count or confirm a merge to `main`. These observations apply to the
+0.0.3 milestone, not to later patches.
 
 ## Remaining limits
 

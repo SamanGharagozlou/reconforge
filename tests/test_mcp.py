@@ -10,7 +10,7 @@ from reconforge.mcp_server import create_server
 class McpTests(unittest.IsolatedAsyncioTestCase):
     async def test_real_stdio_round_trip(self):
         case, evidence, names = await run_round_trip()
-        self.assertEqual(names, ["get_case", "get_evidence", "list_cases"])
+        self.assertEqual(names, ["get_case", "get_evidence", "get_investigation_report", "list_cases"])
         self.assertEqual(case.facts.comparisons.ledger_to_provider.residual_minor, 25000)
         self.assertEqual(evidence.reference.record_number, 7)
         self.assertEqual(evidence.row.event_id, "evt_invoice_001")
@@ -60,7 +60,7 @@ class McpTests(unittest.IsolatedAsyncioTestCase):
         store = CaseStore()
         async with Client(create_server(store)) as client:
             tools = (await client.list_tools()).tools
-            self.assertEqual({tool.name for tool in tools}, {"get_case", "get_evidence", "list_cases"})
+            self.assertEqual({tool.name for tool in tools}, {"get_case", "get_evidence", "get_investigation_report", "list_cases"})
             for tool in tools:
                 with self.subTest(tool=tool.name):
                     self.assertTrue(tool.annotations.read_only_hint)

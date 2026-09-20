@@ -2,8 +2,8 @@
 
 18 September 2026. This is the 0.0.2 local synthetic milestone.
 
-This walkthrough records that earlier milestone. For the current two-case
-version and 48-test suite, use [the next increment](NEXT_02_MULTICASE.md).
+This walkthrough records that earlier milestone. For the current report
+version and 75-test suite, use [the Day 3 walkthrough](DAY_03_REPORTS.md).
 
 ## What you should be able to explain
 
