@@ -58,7 +58,7 @@ class DecisionTrace(FrozenModel):
 
 class InvestigationRun(FrozenModel):
     schema_version: Literal["0.1.0"] = "0.1.0"
-    mode: Literal["scripted_offline", "openai_live"]
+    mode: Literal["scripted_offline", "openai_live", "anthropic_live"]
     requested_model: str | None
     returned_models: tuple[str, ...]
     proposal: InvestigationProposal
@@ -135,13 +135,15 @@ def validate_proposal(candidate: dict, case: ReconciliationCase, report: Verifie
         raise InvestigationError("The proposal must cite every row used by the report's findings.")
     for evidence_id in citations:
         validate_record(case, evidence_id, inspected[evidence_id])
-    for order, options in (
-        (proposal.hypothesis_order, report.report.hypotheses),
-        (proposal.question_order, report.report.unresolved_questions),
-        (proposal.next_step_order, report.report.next_steps),
+    for field, order, options in (
+        ("hypothesis_order", proposal.hypothesis_order, report.report.hypotheses),
+        ("question_order", proposal.question_order, report.report.unresolved_questions),
+        ("next_step_order", proposal.next_step_order, report.report.next_steps),
     ):
         if len(set(order)) != len(order) or set(order) != {item.code for item in options}:
-            raise InvestigationError("The proposal must retain the complete applicable playbook without additions.")
+            raise InvestigationError(
+                f"The proposal field {field} must retain every applicable playbook code exactly once."
+            )
     conclusion = "cause_undetermined" if report.report.review_required else "no_discrepancy_in_supplied_records"
     if proposal.conclusion != conclusion:
         raise InvestigationError("The conclusion does not preserve the case's uncertainty.")
