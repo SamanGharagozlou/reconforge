@@ -106,11 +106,35 @@ def function_tools(case: ReconciliationCase, report: VerifiedReport) -> list[dic
     proposal = supported(InvestigationProposal.model_json_schema())
     for key, value in (("case_id", case.case_id), ("case_version", case.case_version), ("report_id", report.report_id)):
         proposal["properties"][key]["enum"] = [value]
+
+    playbook = {
+        "hypothesis_order": [item.code for item in report.report.hypotheses],
+        "question_order": [item.code for item in report.report.unresolved_questions],
+        "next_step_order": [item.code for item in report.report.next_steps],
+    }
+    for field, codes in playbook.items():
+        field_schema = proposal["properties"][field]
+        items = field_schema.get("items")
+        if codes and isinstance(items, dict):
+            items["enum"] = codes
+        expected = ", ".join(codes) if codes else "(none)"
+        field_schema["description"] = (
+            "Return every applicable code exactly once, in preferred order; "
+            f"do not omit or add codes. Applicable codes: {expected}."
+        )
+
+    playbook_summary = "; ".join(
+        f"{field}=[{', '.join(codes)}]" for field, codes in playbook.items()
+    )
     return [
         {"type": "function", "name": "get_evidence", "strict": True, "parameters": evidence,
          "description": "Read one captured row. The host injects the selected case and version; descriptions are omitted."},
         {"type": "function", "name": "submit_investigation", "strict": True, "parameters": proposal,
-         "description": "Finish with every finding and an ordering of the existing playbook. No financial action is performed."},
+         "description": (
+             "Finish with every verified finding and every applicable playbook code exactly once. "
+             "Only their order may change. No financial action is performed. "
+             f"Exact applicable playbook: {playbook_summary}."
+         )},
     ]
 
 
@@ -165,7 +189,7 @@ class ScriptedModel:
 async def investigate(case: ReconciliationCase, report: VerifiedReport, model: DecisionModel,
                       read_evidence: Callable[[str], Awaitable[EvidenceRecord]]) -> InvestigationRun:
     validate_context(case, report)
-    if model.mode not in ("scripted_offline", "openai_live"):
+    if model.mode not in ("scripted_offline", "openai_live", "anthropic_live"):
         raise InvestigationError("Unknown investigator execution mode.")
     history = [{"role": "user", "content": canonical_json({
         "task": "Inspect the cited evidence and prioritize the applicable investigation playbook.",
@@ -192,7 +216,7 @@ async def investigate(case: ReconciliationCase, report: VerifiedReport, model: D
         if call["name"] == "submit_investigation":
             proposal = validate_proposal(args, case, report, inspected)
             trace.append(DecisionTrace(turn=turn, tool="submit_investigation", evidence_id=None))
-            live = model.mode == "openai_live"
+            live = model.mode != "scripted_offline"
             return InvestigationRun(
                 mode=model.mode, requested_model=model.requested_model, returned_models=tuple(returned_models),
                 proposal=proposal, report=report, model_turns=turn, provider_requests=turn if live else 0,

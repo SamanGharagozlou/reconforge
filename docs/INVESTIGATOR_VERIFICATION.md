@@ -1,5 +1,7 @@
 # Bounded-investigator verification
 
+> Historical v0.0.5 verification record. For v0.0.6 Anthropic live acceptance, see [Anthropic live-provider verification](ANTHROPIC_VERIFICATION.md).
+
 Date: 25 September 2026. Implementation: 0.0.5.
 Latest local verification: macOS, Python 3.12.9. Build-environment verification also passed on Python 3.12.14 on Linux.
 

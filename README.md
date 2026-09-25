@@ -4,14 +4,12 @@
 
 Payment reconciliation investigations with traceable evidence.
 
-**Status: local synthetic prototype, 21 September 2026 (0.0.5).** Two synthetic
+**Status: local synthetic prototype, 25 September 2026 (0.0.6).** Two synthetic
 settlement cases share a deterministic core, a typed case and evidence store,
 a read-only HTTP API, and four MCP tools. Investigation reports separate cited
 facts, unverified possibilities, unresolved questions, and human information
 requests. An optional model-assisted investigator selects evidence and orders
-that fixed playbook, with host-enforced checks. Its live OpenAI adapter is
-implemented; live model acceptance and priority quality have not yet been
-evaluated. Authentication, approvals, databases, and a web interface remain
+that fixed playbook, with host-enforced checks. OpenAI and Anthropic provider adapters are implemented. Claude Sonnet 5 completed both bundled synthetic cases through the live Anthropic path under the same host contract; priority quality remains not evaluated. The earlier OpenAI live attempt stopped at HTTP 429 before an accepted run. Authentication, approvals, databases, and a web interface remain
 planned. ReconForge is a working name.
 
 **Read an example investigation:** [missing invoice deduction](examples/reports/invoice_deduction.md)
@@ -85,7 +83,7 @@ python -m reconforge.mcp_demo
 python -m reconforge.mcp_demo --case-id case_bank_shortfall_001
 ```
 
-The 110-test suite includes the original 13 financial tests plus case, HTTP, MCP,
+The 122-test suite includes the original 13 financial tests plus case, HTTP, MCP,
 case-isolation, report, and investigator checks. Provider HTTP tests use a mock
 transport; CI needs no API key and makes no paid model calls. Each MCP demo launches a real
 stdio server subprocess, discovers its four tools, selects a case, and retrieves
@@ -231,6 +229,7 @@ targets, not released capabilities.
 - [Day 3: evidence-verified investigation reports](docs/DAY_03_REPORTS.md)
 - [Day 4: bounded model-assisted investigator](docs/DAY_04_INVESTIGATOR.md)
 - [Current verification results](docs/INVESTIGATOR_VERIFICATION.md)
+- [Anthropic live-provider verification](docs/ANTHROPIC_VERIFICATION.md)
 - [Scope and acceptance criteria](docs/SCOPE.md)
 - [Financial-core design decision](docs/architecture/0001-financial-core.md)
 - [Report verification design decision](docs/architecture/0004-investigation-reports.md)
