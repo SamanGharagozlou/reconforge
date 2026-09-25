@@ -4,17 +4,20 @@
 
 Payment reconciliation investigations with traceable evidence.
 
-**Status: local synthetic prototype, 20 September 2026 (0.0.4).** Two synthetic
+**Status: local synthetic prototype, 21 September 2026 (0.0.5).** Two synthetic
 settlement cases share a deterministic core, a typed case and evidence store,
 a read-only HTTP API, and four MCP tools. Investigation reports separate cited
 facts, unverified possibilities, unresolved questions, and human information
-requests. Reports use fixed rules; LLM agents, authentication, approvals,
-databases, and a web interface remain planned. ReconForge is a working name.
+requests. An optional model-assisted investigator selects evidence and orders
+that fixed playbook, with host-enforced checks. Its live OpenAI adapter is
+implemented; live model acceptance and priority quality have not yet been
+evaluated. Authentication, approvals, databases, and a web interface remain
+planned. ReconForge is a working name.
 
 **Read an example investigation:** [missing invoice deduction](examples/reports/invoice_deduction.md)
 or [unexplained bank difference](examples/reports/bank_shortfall.md).
 Every reported amount is checked against captured source rows before the server
-returns the report. [Verification scope and results](docs/REPORT_VERIFICATION.md).
+returns the report. [Current verification scope and results](docs/INVESTIGATOR_VERIFICATION.md).
 
 ## Run the first example
 
@@ -82,12 +85,13 @@ python -m reconforge.mcp_demo
 python -m reconforge.mcp_demo --case-id case_bank_shortfall_001
 ```
 
-The 75-test suite includes the original 13 financial tests plus case, HTTP, MCP,
-case-isolation, and report-verification checks. Each MCP demo launches a real
+The 110-test suite includes the original 13 financial tests plus case, HTTP, MCP,
+case-isolation, report, and investigator checks. Provider HTTP tests use a mock
+transport; CI needs no API key and makes no paid model calls. Each MCP demo launches a real
 stdio server subprocess, discovers its four tools, selects a case, and retrieves
 its captured evidence.
 The default retrieves the invoice; `--case-id` above retrieves the bank row. It is a
-deterministic client demonstration; an LLM agent is not implemented yet.
+deterministic client demonstration. The optional investigator is a separate command below.
 
 To inspect the HTTP API locally:
 
@@ -131,6 +135,45 @@ source authenticity, or external reporting completeness.
 The EUR 150.00 bank discrepancy remains unexplained. The report suggests records
 for a person to obtain; it cannot approve or execute a financial action.
 
+## Run the bounded investigator
+
+Start with the offline simulation, which exercises real MCP reads and the same
+proposal validator used by the live path:
+
+```bash
+python -m reconforge.investigator_demo --case-id case_bank_shortfall_001
+python -m reconforge.investigator_demo
+```
+
+The output says `scripted_offline`. This is a deterministic test driver, not an
+LLM result. [Inspect a saved offline run](examples/investigator/bank_scripted.md).
+
+To make actual model calls, choose an API model explicitly and use `--live`:
+
+```bash
+python -m reconforge.investigator_demo --case-id case_bank_shortfall_001 --live --model gpt-4.1-mini-2025-04-14
+```
+
+An API key is read from `OPENAI_API_KEY` or a hidden terminal prompt. The command
+does not save the key. Live mode sends the synthetic report, evidence catalogue,
+and selected rows to OpenAI and uses API quota. The example snapshot supports
+Responses and function calling according to its
+[official model page](https://developers.openai.com/api/docs/models/gpt-4.1-mini).
+Account access and this application's live compatibility still need a live run.
+See [today's walkthrough](docs/DAY_04_INVESTIGATOR.md).
+
+The model chooses evidence reads and the order of existing hypotheses, questions,
+and human information requests. The host fixes the case/version, requires every
+verified finding and exact amount, requires inspection of the report's row
+citations, and rejects unsupported tools or conclusions. There is no free-form
+diagnostic prose in this first contract. All hypothesis wording comes from the
+deterministic playbook and remains unverified.
+
+The result records `contract_status: passed` and `priority_quality: not_evaluated`.
+Those are different claims. A plan can meet every structural rule and still have
+an unhelpful ordering. Model quality, usefulness, and resistance to adversarial
+source data require separate live evaluations.
+
 ## What is implemented
 
 - Exact EUR parsing into integer cents; floats and sub-cent inputs are rejected.
@@ -148,6 +191,9 @@ for a person to obtain; it cannot approve or execute a financial action.
 - Version-bound investigation reports with strict integer amounts and two citation types.
 - Report checks that recompute captured financial facts and enforce fixed claim rules.
 - Readable Markdown examples, JSON output, and report retrieval over HTTP and MCP.
+- A bounded investigator loop with optional OpenAI Responses function calling.
+- Host-controlled case context, evidence-read limits, exact finding checks, and an execution trace.
+- Offline simulation and mocked-provider failure tests, with explicit execution-mode labels.
 
 ## What these results mean
 
@@ -166,10 +212,11 @@ general-ledger records. No money moves and no journal entries are posted.
 
 ## Direction of the project
 
-The intended product combines a deterministic reconciliation core with three
-bounded roles: investigator, resolution planner, and verifier. Those roles will
-use scoped MCP tools and prepare evidence-linked proposals for human review.
-Permissions, calculations, and approval transitions will remain server-enforced.
+The intended product combines a deterministic reconciliation core with bounded
+investigation, resolution planning, and verification. The first investigator
+now consumes the read-only tools; resolution planning and authenticated human
+approval remain future work. Calculations and permitted operations stay under
+application control. Multi-agent orchestration is not implemented in this version.
 
 The first public milestone is a working synthetic investigation demonstration.
 The day-30 target is an evaluated v0.1 with documented limitations. Those are
@@ -182,10 +229,12 @@ targets, not released capabilities.
 - [Day 1: case API and read-only MCP](docs/DAY_01_MCP.md)
 - [Multiple-case milestone](docs/NEXT_02_MULTICASE.md)
 - [Day 3: evidence-verified investigation reports](docs/DAY_03_REPORTS.md)
-- [Current verification results](docs/REPORT_VERIFICATION.md)
+- [Day 4: bounded model-assisted investigator](docs/DAY_04_INVESTIGATOR.md)
+- [Current verification results](docs/INVESTIGATOR_VERIFICATION.md)
 - [Scope and acceptance criteria](docs/SCOPE.md)
 - [Financial-core design decision](docs/architecture/0001-financial-core.md)
 - [Report verification design decision](docs/architecture/0004-investigation-reports.md)
+- [Investigator design decision](docs/architecture/0005-bounded-investigator.md)
 - [Fixture definitions](examples/invoice_deduction/README.md)
 - [Bank-discrepancy fixture](examples/bank_shortfall/README.md)
 - [Contribution instructions](CONTRIBUTING.md)

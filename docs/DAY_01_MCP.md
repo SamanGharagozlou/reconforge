@@ -2,8 +2,8 @@
 
 18 September 2026. This is the 0.0.2 local synthetic milestone.
 
-This walkthrough records that earlier milestone. For the current report
-version and 75-test suite, use [the Day 3 walkthrough](DAY_03_REPORTS.md).
+This walkthrough records that earlier milestone. For the current investigator
+version and 110-test suite, use [the Day 4 walkthrough](DAY_04_INVESTIGATOR.md).
 
 ## What you should be able to explain
 
