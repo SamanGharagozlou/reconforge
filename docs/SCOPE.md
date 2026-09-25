@@ -9,6 +9,10 @@ immutable case/evidence views, and fixed-rule investigation reports exposed
 through a local API and stdio MCP. Reports distinguish cited facts, unverified
 possibilities, unresolved questions, and human information requests.
 
+The 0.0.5 investigator can consume those tools and submit a bounded proposal.
+An optional OpenAI adapter supplies model decisions; the default driver is an
+explicit offline script. Only the host can bind the case and validate the result.
+
 Target output for the later demonstration: a source-backed investigation,
 proposed next action, and a version-bound human-review decision.
 
@@ -38,9 +42,10 @@ proposed next action, and a version-bound human-review decision.
 
 ## Explicit limits
 
-The prototype has a local read-only API and MCP server. It has no language model,
-user authentication, database, durable worker, payment integration, or automated
-accounting action. It compares fixture
+The prototype has a local read-only API and MCP server plus an optional model
+adapter whose live acceptance is pending. It has no user authentication,
+database, durable worker, payment integration, or automated accounting action.
+It compares fixture
 IDs that already match across two normalized sources. Real adapter semantics,
 record completeness and cross-system identity resolution are future work.
 
@@ -54,9 +59,10 @@ record completeness and cross-system identity resolution are future work.
 ## Next implementation work
 
 - Add timing, ambiguity and incomplete-data scenarios with explicit expected behaviour.
-- Add a bounded model-assisted investigator using the case, evidence, and report
-  tools. Keep model interpretation separate from the fixed-rule verified report.
-- Define evaluation failures before introducing autonomous orchestration.
+- Complete live model acceptance for the investigator and evaluate priority
+  quality against an analyst-reviewed baseline on held-out synthetic scenarios.
+- Keep model decisions separate from the fixed-rule verified report.
+- Expand evaluation scenarios before introducing multi-agent orchestration.
 - Design authentication and tenant access before supporting customer data.
 
 ## Completed in the multiple-case increment
@@ -80,3 +86,14 @@ record completeness and cross-system identity resolution are future work.
 - Supply Markdown examples and a real MCP report client; all 75 tests pass in
   the build environment. See [verification results](REPORT_VERIFICATION.md).
 - Limit reports to 100 event differences; return an error above that limit.
+
+## Completed in the bounded-investigator increment
+
+- Use one local MCP session for case/report retrieval and all selected evidence reads.
+- Offer the model only `get_evidence` and local `submit_investigation` functions.
+- Permit ordering of the existing playbook; enforce all findings, exact amounts,
+  required row inspection, complete unknowns, and an undetermined cause.
+- Provide a bounded Responses HTTP adapter and an explicit offline simulator.
+- Record tool choices, execution mode, requested/returned models, and reported
+  usage for accepted runs. Failed runs return an error without an accepted plan.
+- Test these controls without a paid provider. See [verification status](INVESTIGATOR_VERIFICATION.md).

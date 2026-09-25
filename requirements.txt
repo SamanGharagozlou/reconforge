@@ -1,6 +1,6 @@
 # Pinned Day 1 environment, verified on Python 3.12 (18 September 2026).
 # Direct dependencies: mcp, fastapi, pydantic, uvicorn, httpx.
-# Includes resolved transitive dependencies; no model provider SDK or key required.
+# Offline tests/demos need no key. Optional live mode uses httpx and an OpenAI API key.
 annotated-doc==0.0.5
 annotated-types==0.8.0
 anyio==4.15.1

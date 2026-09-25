@@ -2,6 +2,9 @@
 
 20 September 2026. Local synthetic milestone 0.0.4.
 
+Historical walkthrough. The next increment is
+[Day 4: the bounded investigator](DAY_04_INVESTIGATOR.md).
+
 Today's outcome: turn either synthetic case into an inspectable investigation
 report through a fourth MCP tool. The report contains cited facts, unverified
 possibilities, unresolved questions, and requests for a human analyst to obtain

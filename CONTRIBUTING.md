@@ -19,6 +19,7 @@ python -m unittest discover -s tests -v
 python -m reconforge.demo --json
 python -m reconforge.mcp_demo
 python -m reconforge.report_demo --case-id case_bank_shortfall_001
+python -m reconforge.investigator_demo --case-id case_bank_shortfall_001
 ```
 
 For a change, describe the problem, expected behaviour, relevant source semantics,
@@ -41,6 +42,13 @@ python -m reconforge.report_demo --case-id case_bank_shortfall_001 > examples/re
 
 Inspect the diff. Update schema or policy versions when their contracts change;
 the report digest includes those versions and the complete structured report.
+
+Investigator tests must run without credentials or live API calls. Exercise
+host checks with invalid proposals and the HTTP adapter with `httpx.MockTransport`.
+Do not relabel scripted runs as model evaluations. Keep raw provider responses,
+credentials, and reasoning items out of saved examples. The execution trace
+records tool choices, not internal model reasoning. Describe the exact scope of
+any model-quality claim and link an actual observed run.
 
 Useful first contributions include a parser edge case, clearer fixture documentation,
 or a proposed scenario with explicit expected totals and review behaviour.

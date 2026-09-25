@@ -3,6 +3,8 @@
 Date: 20 September 2026. Implementation: 0.0.4.
 Build environment: Python 3.12.14 on Linux with the existing pinned requirements.
 
+Historical milestone. Current results are in [investigator verification](INVESTIGATOR_VERIFICATION.md).
+
 ## Observed build results
 
 All **75 unit and integration tests pass**: the previous 48 plus 27 report tests.
@@ -37,11 +39,10 @@ The new tests cover:
 
 ## Platform status
 
-These are build-environment results. The 0.0.4 macOS run and its GitHub Actions
-run are pending until the user applies and publishes this patch. The previous
-0.0.3 bank demonstration succeeded on the user's Mac; a supplied GitHub screenshot
-showed its feature-branch workflow succeeded at commit `722daca`. Those results
-do not establish this new version's status or confirm a merge to `main`.
+On 20 September, the user reported the 0.0.4 checks succeeded, the pull request
+was merged after its checks passed, and the local `main` checkout was synced and
+working. These are user-reported macOS/GitHub outcomes; the build-environment
+results above were observed directly. Neither establishes a later version's status.
 
 ## What verification does not establish
 
